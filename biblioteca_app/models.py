@@ -3,19 +3,27 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 import datetime
 
 
-# definir el modelo
+# definir el modelo 
 
 class Libro(models.Model):
     titulo = models.CharField(max_length=40)
     autor = models.CharField(max_length=30)
     isbn = models.CharField(max_length=13, unique=True)
-    genero = models.CharField(max_length=20, verbose_name='Género', blank=True, null=True)
     precio = models.DecimalField(
         max_digits=6,
         decimal_places=2, 
         verbose_name='Precio ($)', 
         validators=[MinValueValidator(0.01)],
+    )
+
+genero = models.CharField(
+    max_length=20,
         )
+
+editorial = models.CharField(
+    max_length=30,
+        )
+
 stock = models.IntegerField(
     verbose_name='Stock',
     validators=[MinValueValidator(0), MaxValueValidator(100)],
