@@ -1,11 +1,63 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="card">
-    <div class="card-body">
-        <h1 class="text-primary">Bienvenido a la biblioteca</h1>
-        <p class="lead">Aquí puedes mostrar tus datos y formularios con estilo Bootstrap.</p>
-        <button class="btn btn-success">Acción</button>
+<div class="text-center mb-5">
+    <h1 class="display-5">Sistema de Biblioteca</h1>
+    <p class="lead text-muted">Gestión de libros, editoriales y géneros.</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm border-primary">
+            <div class="card-body text-center">
+                <h2 class="display-4 text-primary">{{ total_libros }}</h2>
+                <h5 class="card-title">Libros</h5>
+                <p class="card-text text-muted">Catálogo con editorial, género, precio y stock.</p>
+                <a href="{% url 'libro_panel' %}" class="btn btn-primary">Ir a libros</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm border-success">
+            <div class="card-body text-center">
+                <h2 class="display-4 text-success">{{ total_editoriales }}</h2>
+                <h5 class="card-title">Editoriales</h5>
+                <p class="card-text text-muted">Casas editoras registradas.</p>
+                <a href="{% url 'editorial_panel' %}" class="btn btn-success">Ir a editoriales</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm border-warning">
+            <div class="card-body text-center">
+                <h2 class="display-4 text-warning">{{ total_generos }}</h2>
+                <h5 class="card-title">Géneros</h5>
+                <p class="card-text text-muted">Categorías literarias.</p>
+                <a href="{% url 'genero_panel' %}" class="btn btn-warning">Ir a géneros</a>
+            </div>
+        </div>
     </div>
 </div>
+
+{% if ultimos %}
+<h4 class="mt-5 mb-3">Últimos libros agregados</h4>
+<div class="table-responsive">
+    <table class="table table-sm table-hover bg-white">
+        <thead class="table-light">
+            <tr><th>Título</th><th>Autor</th><th>Editorial</th><th>Género</th><th class="text-end">Precio</th></tr>
+        </thead>
+        <tbody>
+            {% for libro in ultimos %}
+            <tr>
+                <td>{{ libro.titulo }}</td>
+                <td>{{ libro.autor }}</td>
+                <td>{{ libro.editorial.nombre }}</td>
+                <td>{{ libro.genero.nombre }}</td>
+                <td class="text-end">${{ libro.precio }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
 {% endblock %}

@@ -7,7 +7,13 @@ from .forms import EditorialForm, GeneroForm, LibroForm
 
 
 def inicio(request):
-    return render(request, 'inicio.html')
+    return render(request, 'inicio.html', {
+        'total_libros': Libro.objects.count(),            # SELECT COUNT(*) por tabla
+        'total_editoriales': Editorial.objects.count(),
+        'total_generos': Genero.objects.count(),
+        # los 5 más recientes (id más alto); select_related evita N+1 en la tabla
+        'ultimos': Libro.objects.select_related('editorial', 'genero').order_by('-id')[:5],
+    })
 
 
 # ---------- Editorial ----------
