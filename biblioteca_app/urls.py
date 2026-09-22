@@ -16,6 +16,9 @@ urlpatterns = [
     path('generos/<int:pk>/editar/', views.genero_editar, name='genero_editar'),
     path('generos/eliminar/', views.genero_eliminar, name='genero_eliminar'),
 
-    # Libro (Conny agrega aquí sus rutas: libro_panel, libro_crear,
-    # libro_editar con <str:isbn>, libro_eliminar)
+    # Libro
+    path('libros/', views.libro_panel, name='libro_panel'),
+    path('libros/crear/', views.libro_crear, name='libro_crear'),
+    path('libros/<int:pk>/editar/', views.libro_editar, name='libro_editar'),
+    path('libros/eliminar/', views.libro_eliminar, name='libro_eliminar'),
 ]
