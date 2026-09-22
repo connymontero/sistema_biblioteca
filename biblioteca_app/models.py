@@ -25,8 +25,8 @@ class Genero(models.Model):
 
 
 class Libro(models.Model):
-    isbn = models.CharField(max_length=13, primary_key=True, verbose_name='ISBN')
-    titulo = models.CharField(max_length=40, verbose_name='Título')
+    isbn = models.CharField(max_length=13, verbose_name='ISBN')  # obligatorio, repetible; la PK es el id automático
+    titulo = models.CharField(max_length=100, verbose_name='Título')
     autor = models.CharField(max_length=30)
     precio = models.DecimalField(
         max_digits=6,
