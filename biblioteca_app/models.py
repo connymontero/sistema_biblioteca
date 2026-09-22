@@ -29,7 +29,7 @@ class Libro(models.Model):
     titulo = models.CharField(max_length=100, verbose_name='Título')
     autor = models.CharField(max_length=30)
     precio = models.DecimalField(
-        max_digits=6,
+        max_digits=10,   # hasta 99.999.999,99 (8 enteros + 2 decimales); antes 6 = max 9999.99
         decimal_places=2,
         verbose_name='Precio ($)',
         validators=[MinValueValidator(0.01)],
