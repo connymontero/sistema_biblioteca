@@ -52,11 +52,12 @@
         {% endblock %}
     </div>
 
-    {# Modales compartidos del patrón de panel (los agrega Luis): {% include '_modales.html' %} #}
+    {# Modales compartidos del patrón de panel (vacíos; los rellena crud_panel.js) #}
+    {% include '_modales.html' %}
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    {# JS compartido del patrón de panel (lo agrega Luis): <script src="{% static 'js/crud_panel.js' %}"></script> #}
+    <script src="{% static 'js/crud_panel.js' %}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
