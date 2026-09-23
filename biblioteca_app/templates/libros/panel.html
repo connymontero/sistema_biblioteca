@@ -3,125 +3,137 @@
 {% block titulo %}Libros · Biblioteca{% endblock %}
 
 {% block content %}
-<h2 class="mb-3">Libros</h2>
+{% include 'componentes/_encabezado.html' with icono='📖' titulo='Libros' subtitulo='Catálogo completo: editorial, género, precio y stock' %}
 
 {# ---- Filtros: GET normal, la vista lee request.GET y recarga la tabla ---- #}
-<form method="get" class="row g-2 align-items-end mb-3">
-    <div class="col-md-4">
-        <label class="form-label" for="q">Buscar</label>
-        <input type="text" class="form-control" id="q" name="q" value="{{ q }}" placeholder="Título, autor o ISBN">
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label" for="q">Buscar</label>
+                <input type="text" class="form-control" id="q" name="q" value="{{ q }}" placeholder="Título, autor o ISBN">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="editorial">Editorial</label>
+                <select class="form-select" id="editorial" name="editorial">
+                    <option value="">Todas</option>
+                    {% for e in editoriales %}
+                        <option value="{{ e.id }}" {% if editorial_id == e.id|stringformat:'s' %}selected{% endif %}>{{ e.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="genero">Género</label>
+                <select class="form-select" id="genero" name="genero">
+                    <option value="">Todos</option>
+                    {% for g in generos %}
+                        <option value="{{ g.id }}" {% if genero_id == g.id|stringformat:'s' %}selected{% endif %}>{{ g.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="orden">Orden</label>
+                <select class="form-select" id="orden" name="orden">
+                    <option value="titulo"  {% if orden == 'titulo' %}selected{% endif %}>Título A-Z</option>
+                    <option value="-titulo" {% if orden == '-titulo' %}selected{% endif %}>Título Z-A</option>
+                    <option value="autor"   {% if orden == 'autor' %}selected{% endif %}>Autor A-Z</option>
+                    <option value="precio"  {% if orden == 'precio' %}selected{% endif %}>Precio menor</option>
+                    <option value="-precio" {% if orden == '-precio' %}selected{% endif %}>Precio mayor</option>
+                    <option value="-anio"   {% if orden == '-anio' %}selected{% endif %}>Más recientes</option>
+                    <option value="stock"   {% if orden == 'stock' %}selected{% endif %}>Menor stock</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-outline-primary">Buscar</button>
+                <a href="{% url 'libro_panel' %}" class="btn btn-outline-secondary">Limpiar</a>
+            </div>
+        </form>
     </div>
-    <div class="col-md-2">
-        <label class="form-label" for="editorial">Editorial</label>
-        <select class="form-select" id="editorial" name="editorial">
-            <option value="">Todas</option>
-            {% for e in editoriales %}
-                <option value="{{ e.id }}" {% if editorial_id == e.id|stringformat:'s' %}selected{% endif %}>{{ e.nombre }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="col-md-2">
-        <label class="form-label" for="genero">Género</label>
-        <select class="form-select" id="genero" name="genero">
-            <option value="">Todos</option>
-            {% for g in generos %}
-                <option value="{{ g.id }}" {% if genero_id == g.id|stringformat:'s' %}selected{% endif %}>{{ g.nombre }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="col-md-2">
-        <label class="form-label" for="orden">Orden</label>
-        <select class="form-select" id="orden" name="orden">
-            <option value="titulo"  {% if orden == 'titulo' %}selected{% endif %}>Título A-Z</option>
-            <option value="-titulo" {% if orden == '-titulo' %}selected{% endif %}>Título Z-A</option>
-            <option value="autor"   {% if orden == 'autor' %}selected{% endif %}>Autor A-Z</option>
-            <option value="precio"  {% if orden == 'precio' %}selected{% endif %}>Precio menor</option>
-            <option value="-precio" {% if orden == '-precio' %}selected{% endif %}>Precio mayor</option>
-            <option value="-anio"   {% if orden == '-anio' %}selected{% endif %}>Más recientes</option>
-            <option value="stock"   {% if orden == 'stock' %}selected{% endif %}>Menor stock</option>
-        </select>
-    </div>
-    <div class="col-md-2 d-flex gap-2">
-        <button type="submit" class="btn btn-outline-primary">Buscar</button>
-        <a href="{% url 'libro_panel' %}" class="btn btn-outline-secondary">Limpiar</a>
-    </div>
-</form>
-
-{# ---- Botones de acción (crud_panel.js los habilita según la selección) ---- #}
-<div class="d-flex gap-2 mb-2">
-    <button type="button" class="btn btn-success" id="btn-anadir"
-            data-url="{% url 'libro_crear' %}" data-titulo="Nuevo libro">Añadir</button>
-    <button type="button" class="btn btn-primary" id="btn-modificar" disabled
-            data-url-editar="{% url 'libro_editar' 0 %}" data-titulo="Modificar libro">Modificar</button>
-    <button type="button" class="btn btn-danger" id="btn-eliminar" disabled>Eliminar</button>
-    <span class="ms-auto align-self-center text-muted">{{ libros|length }} libro(s)</span>
 </div>
 
-{# ---- Tabla envuelta en el form de eliminar (POST con los checkboxes marcados) ---- #}
-<form method="post" action="{% url 'libro_eliminar' %}" id="form-tabla">
-    {% csrf_token %}
-    {# max-height + overflow hacen scrolleable la tabla; el thead queda fijo con position:sticky #}
-    <div class="table-responsive" style="max-height:420px; overflow-y:auto">
-        <table class="table table-hover table-sm bg-white align-middle">
-            <thead class="table-light" style="position:sticky; top:0; z-index:1">
-                <tr>
-                    <th style="width:2rem"><input type="checkbox" class="form-check-input" id="chk-todos"></th>
-                    <th>ISBN</th>
-                    <th>Título</th>
-                    <th>Autor</th>
-                    <th>Editorial</th>
-                    <th>Género</th>
-                    <th class="text-end">Año</th>
-                    <th class="text-end">Stock</th>
-                    <th class="text-end">Precio</th>
-                    <th style="width:3rem" class="text-center">Desc.</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for libro in libros %}
-                <tr>
-                    <td><input type="checkbox" class="form-check-input" name="seleccionados" value="{{ libro.pk }}"></td>
-                    <td class="font-monospace">{{ libro.isbn }}</td>
-                    <td>{{ libro.titulo }}</td>
-                    <td>{{ libro.autor }}</td>
-                    <td>{{ libro.editorial.nombre }}</td>  {# sin consulta extra gracias a select_related #}
-                    <td>{{ libro.genero.nombre }}</td>
-                    <td class="text-end">{{ libro.anio_publicacion }}</td>
-                    <td class="text-end">{{ libro.stock }}</td>
-                    <td class="text-end">${{ libro.precio|floatformat:0 }}</td>
-                    {% comment %}
-                        type="button" es obligatorio: dentro de un formulario, un boton sin
-                        type se comporta como submit y dispararia el borrado.
-                        La descripcion viaja en data-descripcion: ya venia en el queryset,
-                        asi que el visor no necesita pedir nada al servidor.
-                    {% endcomment %}
-                    <td class="text-center">
-                        <button type="button" class="btn btn-sm btn-outline-secondary btn-ver-desc"
-                                title="Ver descripción"
-                                data-titulo="{{ libro.titulo }}"
-                                data-descripcion="{{ libro.descripcion|default_if_none:'' }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
-                                <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
-                            </svg>
-                        </button>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="10" class="text-center text-muted py-4">No hay libros que coincidan con el filtro.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<div class="card">
+    {% comment %}
+        Botones Añadir / Modificar / Eliminar: plantilla compartida por los tres paneles.
+        La etiqueta url con "as variable" guarda la URL para poder pasarla en el include:
+        no se puede anidar una etiqueta dentro de otra.
+        El 0 de libro_editar es el marcador que crud_panel.js reemplaza por el pk.
+        (Este comentario usa comment/endcomment porque el de llave-almohadilla solo
+        vale para una línea.)
+    {% endcomment %}
+    {% url 'libro_crear' as url_crear %}
+    {% url 'libro_editar' 0 as url_editar %}
+    <div class="card-header">
+        {% include 'componentes/_acciones.html' with url_crear=url_crear titulo_crear='Nuevo libro' url_editar=url_editar titulo_editar='Modificar libro' conteo=libros|length etiqueta='libro(s)' %}
     </div>
-</form>
+
+    {# ---- Tabla envuelta en el form de eliminar (POST con los checkboxes marcados) ---- #}
+    <form method="post" action="{% url 'libro_eliminar' %}" id="form-tabla">
+        {% csrf_token %}
+        {# tabla-scroll (estilo.css) limita el alto y deja el encabezado fijo al hacer scroll #}
+        <div class="table-responsive tabla-scroll">
+            <table class="table table-hover table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th style="width:2rem"><input type="checkbox" class="form-check-input" id="chk-todos"></th>
+                        <th>ISBN</th>
+                        <th>Título</th>
+                        <th>Autor</th>
+                        <th>Editorial</th>
+                        <th>Género</th>
+                        <th class="text-end">Año</th>
+                        <th class="text-end">Stock</th>
+                        <th class="text-end">Precio</th>
+                        <th style="width:3rem" class="text-center">Desc.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for libro in libros %}
+                    <tr>
+                        <td><input type="checkbox" class="form-check-input" name="seleccionados" value="{{ libro.pk }}"></td>
+                        <td class="font-monospace small">{{ libro.isbn }}</td>
+                        <td class="fw-semibold">{{ libro.titulo }}</td>
+                        <td>{{ libro.autor }}</td>
+                        <td>{{ libro.editorial.nombre }}</td>  {# sin consulta extra gracias a select_related #}
+                        <td>{{ libro.genero.nombre }}</td>
+                        <td class="text-end">{{ libro.anio_publicacion }}</td>
+                        <td class="text-end">{{ libro.stock }}</td>
+                        <td class="text-end">${{ libro.precio|floatformat:0 }}</td>
+                        {% comment %}
+                            type="button" es obligatorio: dentro de un formulario, un boton sin
+                            type se comporta como submit y dispararia el borrado.
+                            La descripcion viaja en data-descripcion: ya venia en el queryset,
+                            asi que el visor no necesita pedir nada al servidor.
+                        {% endcomment %}
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-outline-secondary btn-ver-desc"
+                                    title="Ver descripción"
+                                    data-titulo="{{ libro.titulo }}"
+                                    data-descripcion="{{ libro.descripcion|default_if_none:'' }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8M1.173 8a13 13 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5s3.879 1.168 5.168 2.457A13 13 0 0 1 14.828 8q-.086.13-.195.288c-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5s-3.879-1.168-5.168-2.457A13 13 0 0 1 1.172 8z"/>
+                                    <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5M4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0"/>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="10" class="text-center tabla-vacia py-4">No hay libros que coincidan con el filtro.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </form>
+</div>
 
 {# ---- Visor de descripción: oculto (d-none) hasta que se pulsa el botón del ojo ---- #}
-<div id="visor-descripcion" class="mt-3 d-none">
-    <h5>Descripción</h5>
-    <p class="fw-bold mb-2" id="desc-titulo"></p>
-    {# resize:none quita el tirador; overflow:hidden evita la barra de scroll (el script ajusta el alto) #}
-    <textarea class="form-control" id="desc-texto" rows="3" readonly
-              style="resize:none; overflow:hidden"></textarea>
+<div id="visor-descripcion" class="card mt-3 d-none">
+    <div class="card-header fw-semibold">Descripción</div>
+    <div class="card-body">
+        <p class="fw-bold mb-2" id="desc-titulo"></p>
+        {# resize:none quita el tirador; overflow:hidden evita la barra de scroll (el script ajusta el alto) #}
+        <textarea class="form-control" id="desc-texto" rows="3" readonly
+                  style="resize:none; overflow:hidden"></textarea>
+    </div>
 </div>
 {% endblock %}
 

@@ -1,0 +1,20 @@
+{% comment %}
+Encabezado de página, compartido por los tres paneles.
+
+Se usa así, pasándole los datos con "with":
+
+    {% include 'componentes/_encabezado.html' with icono='📚' titulo='Libros' subtitulo='Catálogo' %}
+
+Concepto Django: {% include %} inserta otra plantilla dentro de esta. Con "with"
+se le pasan variables, igual que los argumentos de una función. Así el diseño del
+encabezado se escribe una sola vez y los tres paneles lo reutilizan: si mañana
+cambia, se cambia en un solo archivo.
+{% endcomment %}
+
+<div class="encabezado-panel">
+    <div class="icono">{{ icono }}</div>
+    <div>
+        <h2>{{ titulo }}</h2>
+        <p class="subtitulo">{{ subtitulo }}</p>
+    </div>
+</div>

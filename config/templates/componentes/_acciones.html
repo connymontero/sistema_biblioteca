@@ -1,0 +1,28 @@
+{% comment %}
+Barra de botones Añadir / Modificar / Eliminar, compartida por los tres paneles.
+
+Se usa así:
+
+    {% include 'componentes/_acciones.html' with url_crear=... titulo_crear='Nuevo libro' url_editar=... titulo_editar='Modificar libro' conteo=libros|length etiqueta='libro(s)' %}
+
+Los ids y los data-* son el contrato que espera config/static/js/crud_panel.js:
+    #btn-anadir     data-url          URL de la vista crear
+    #btn-modificar  data-url-editar   URL de editar con un 0 que el JS reemplaza por el pk
+    #btn-eliminar
+Por eso los tres paneles pueden compartir el mismo archivo JS sin tocarlo.
+{% endcomment %}
+
+<div class="d-flex flex-wrap gap-2 align-items-center">
+    <button type="button" class="btn btn-success" id="btn-anadir"
+            data-url="{{ url_crear }}" data-titulo="{{ titulo_crear }}">
+        + Añadir
+    </button>
+    <button type="button" class="btn btn-primary" id="btn-modificar" disabled
+            data-url-editar="{{ url_editar }}" data-titulo="{{ titulo_editar }}">
+        Modificar
+    </button>
+    <button type="button" class="btn btn-danger" id="btn-eliminar" disabled>
+        Eliminar
+    </button>
+    <span class="ms-auto contador-registros">{{ conteo }} {{ etiqueta }}</span>
+</div>
