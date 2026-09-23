@@ -1,6 +1,10 @@
 {% comment %}
 Pie de página del sitio. Se incluye una sola vez desde base.html, así que
 aparece automáticamente en todas las páginas que extienden la plantilla base.
+
+Ojo: todas las etiquetas deben quedar cerradas. Si <footer> o <div> quedan
+abiertos, el navegador mete dentro del pie todo lo que viene después (los
+modales), y esos heredan el color claro del pie sobre fondo claro.
 {% endcomment %}
 
 <footer class="pie-biblioteca">

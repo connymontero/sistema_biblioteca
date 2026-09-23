@@ -159,9 +159,13 @@ h1, h2, h3, h4, h5, .fuente-serif {
     margin-bottom: 0;
 }
 
-.table > thead { background-color: var(--biblio-cafe); }
-
+/* El fondo del encabezado va en el <th>, NO en el <thead>: Bootstrap 5.3 pinta
+   cada celda con "background-color: var(--bs-table-bg)", y ese fondo taparia el
+   del thead dejando texto claro sobre fondo claro. box-shadow: none anula el
+   relleno inset que Bootstrap usa para las filas con color. */
 .table > thead th {
+    background-color: var(--biblio-cafe);
+    box-shadow: none;
     color: #f6efe4;
     font-family: var(--biblio-serif);
     font-weight: 600;
@@ -178,7 +182,9 @@ h1, h2, h3, h4, h5, .fuente-serif {
 }
 
 .tabla-scroll { max-height: 420px; overflow-y: auto; }
-.tabla-scroll thead { position: sticky; top: 0; z-index: 1; }
+/* sticky se aplica a las celdas, no al <thead>: es lo que mejor soportan los
+   navegadores y ademas cada th lleva ya su propio fondo opaco. */
+.tabla-scroll thead th { position: sticky; top: 0; z-index: 1; }
 
 /* ---------- Botones ---------- */
 
