@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block titulo %}Géneros · Biblioteca{% endblock %}
+
+{% block content %}
+<h2 class="mb-3">Géneros</h2>
+
+{# ---- Filtros: GET normal, la vista lee request.GET y recarga la tabla ---- #}
+<form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-md-5">
+        <label class="form-label" for="q">Buscar</label>
+        <input type="text" class="form-control" id="q" name="q" value="{{ q }}" placeholder="Nombre del género">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label" for="orden">Orden</label>
+        <select class="form-select" id="orden" name="orden">
+            <option value="asc"  {% if orden == 'asc' %}selected{% endif %}>Nombre A-Z</option>
+            <option value="desc" {% if orden == 'desc' %}selected{% endif %}>Nombre Z-A</option>
+        </select>
+    </div>
+    <div class="col-md-4 d-flex gap-2">
+        <button type="submit" class="btn btn-outline-primary">Buscar</button>
+        <a href="{% url 'genero_panel' %}" class="btn btn-outline-secondary">Limpiar</a>
+    </div>
+</form>
+
+{# ---- Botones de acción (crud_panel.js los habilita según la selección) ---- #}
+<div class="d-flex gap-2 mb-2">
+    <button type="button" class="btn btn-success" id="btn-anadir"
+            data-url="{% url 'genero_crear' %}" data-titulo="Nuevo género">Añadir</button>
+    <button type="button" class="btn btn-primary" id="btn-modificar" disabled
+            data-url-editar="{% url 'genero_editar' 0 %}" data-titulo="Modificar género">Modificar</button>
+    <button type="button" class="btn btn-danger" id="btn-eliminar" disabled>Eliminar</button>
+    <span class="ms-auto align-self-center text-muted">{{ generos|length }} género(s)</span>
+</div>
+
+{# ---- Tabla envuelta en el form de eliminar (POST con los checkboxes marcados) ---- #}
+<form method="post" action="{% url 'genero_eliminar' %}" id="form-tabla">
+    {% csrf_token %}
+    <div class="table-responsive">
+        <table class="table table-hover table-sm bg-white align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th style="width:2rem"><input type="checkbox" class="form-check-input" id="chk-todos"></th>
+                    <th style="width:6rem" class="text-end">ID</th>
+                    <th>Nombre</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for genero in generos %}
+                <tr>
+                    <td><input type="checkbox" class="form-check-input" name="seleccionados" value="{{ genero.pk }}"></td>
+                    <td class="text-end font-monospace">{{ genero.pk }}</td>
+                    <td>{{ genero.nombre }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="text-center text-muted py-4">No hay géneros que coincidan con el filtro.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</form>
+{% endblock %}

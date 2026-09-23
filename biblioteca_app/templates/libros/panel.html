@@ -85,7 +85,7 @@
                     <td>{{ libro.genero.nombre }}</td>
                     <td class="text-end">{{ libro.anio_publicacion }}</td>
                     <td class="text-end">{{ libro.stock }}</td>
-                    <td class="text-end">${{ libro.precio }}</td>
+                    <td class="text-end">${{ libro.precio|floatformat:0 }}</td>
                 </tr>
                 {% empty %}
                 <tr><td colspan="9" class="text-center text-muted py-4">No hay libros que coincidan con el filtro.</td></tr>

@@ -1,0 +1,27 @@
+{# Fragmento: solo el <form>. Lo carga crud_panel.js dentro de #modal-form. Sirve para crear y editar. #}
+<form method="post" action="{{ accion }}">
+    {% csrf_token %}
+
+    {% if form.instance.pk %}
+        <p class="text-muted small mb-3">ID: {{ form.instance.pk }}</p>
+    {% endif %}
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger py-2">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    {% for campo in form %}
+        <div class="mb-3">
+            <label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+            {{ campo }}
+            {% for error in campo.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+
+    <div class="text-end">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </div>
+</form>

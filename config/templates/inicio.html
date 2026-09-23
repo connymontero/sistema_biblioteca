@@ -53,7 +53,7 @@
                 <td>{{ libro.autor }}</td>
                 <td>{{ libro.editorial.nombre }}</td>
                 <td>{{ libro.genero.nombre }}</td>
-                <td class="text-end">${{ libro.precio }}</td>
+                <td class="text-end">${{ libro.precio|floatformat:0 }}</td>
             </tr>
             {% endfor %}
         </tbody>
