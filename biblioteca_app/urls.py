@@ -2,7 +2,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.inicio, name='inicio'),
+    path('inicio', views.inicio, name='inicio'),
+    path('', views.login_pagina, name='login'),
 
     # Editorial
     path('editoriales/', views.editorial_panel, name='editorial_panel'),
@@ -21,4 +22,7 @@ urlpatterns = [
     path('libros/crear/', views.libro_crear, name='libro_crear'),
     path('libros/<int:pk>/editar/', views.libro_editar, name='libro_editar'),
     path('libros/eliminar/', views.libro_eliminar, name='libro_eliminar'),
+
+    #API REST para Autenticar
+    path('api/login/', views.LoginApiView.as_view(), name='login_api')
 ]

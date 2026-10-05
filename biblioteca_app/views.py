@@ -1,10 +1,20 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib import messages
+from django.contrib.auth import authenticate, login as auth_login
 from django.db.models import ProtectedError, Q
 from .models import Editorial, Genero, Libro
 from .forms import EditorialForm, GeneroForm, LibroForm
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import AllowAny
+from rest_framework.authtoken.models import Token
 
+def login(request):
+    if request.user.is_authenticated:
+        return redirect('inicio')  # Redirige a la página de inicio si el usuario ya está autenticado
+    return render(request, 'login.html')
 
 def inicio(request):
     return render(request, 'inicio.html', {
@@ -218,3 +228,35 @@ def libro_eliminar(request):
         cantidad, _ = Libro.objects.filter(pk__in=ids).delete()
         messages.success(request, f'{cantidad} libro(s) eliminado(s).')
     return redirect('libro_panel')
+
+
+#------------ Login -------------
+
+def login_pagina(request):
+    return render(request, 'login.html')
+
+
+class LoginApiView(APIView):
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        usuario = authenticate(request, username=username, password=password)
+
+        if usuario is not None:
+            auth_login(request, usuario)
+            token, _ = Token.objects.get_or_create(user=usuario)
+
+            return Response({
+                'mensaje': 'Autenticacion correcta',
+                'usuario': usuario.username,
+                'token': token.key,
+                'redirect': '/inicio'
+            }, status=status.HTTP_200_OK)
+
+        return Response({
+            'error': 'Usuario o contraseña incorrectos'
+        }, status=status.HTTP_401_UNAUTHORIZED)
