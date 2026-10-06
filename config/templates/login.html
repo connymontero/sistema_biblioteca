@@ -1,39 +1,71 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Iniciar sesión</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión · Biblioteca</title>
+
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/estilo.css' %}" rel="stylesheet">
 </head>
 <body>
+    <main class="container d-flex align-items-center justify-content-center py-5">
+        <div class="row justify-content-center w-100">
+            <div class="col-sm-8 col-md-6 col-lg-4">
 
-    <h1>Iniciar sesión</h1>
+                <div class="card">
+                    <div class="card-header text-center py-3">
+                        <h1 class="h4 mb-0">📚 Biblioteca</h1>
+                    </div>
+                    <div class="card-body p-4">
+                        <h2 class="h5 text-center mb-4">Iniciar sesión</h2>
 
-    <form id="formLogin">
-        <label for="username">Usuario:</label>
-        <input type="text" id="username" required>
+                        <form id="formLogin">
+                            <div class="mb-3">
+                                <label class="form-label" for="username">Usuario</label>
+                                <input type="text" id="username" class="form-control" required maxlength="35" autocomplete="username" autofocus>
+                            </div>
 
-        <br><br>
+                            <div class="mb-3">
+                                <label class="form-label" for="password">Contraseña</label>
+                                <input type="password" id="password" class="form-control" required maxlength="128" autocomplete="current-password">
+                            </div>
 
-        <label for="password">Contraseña:</label>
-        <input type="password" id="password" required>
+                            <div id="mensaje" class="alert d-none py-2" role="alert"></div>
 
-        <br><br>
+                            <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+                        </form>
+                    </div>
+                </div>
 
-        <button type="submit">Ingresar</button>
-    </form>
+            </div>
+        </div>
+    </main>
 
-    <p id="mensaje"></p>
+    {% include 'componentes/_pie.html' %}
 
     <!-- JavaScript dentro del HTML -->
     <script>
         const formulario = document.getElementById('formLogin');
         const mensaje = document.getElementById('mensaje');
 
+        function mostrarMensaje(texto, tipo) {
+            mensaje.textContent = texto;
+            mensaje.className = 'alert alert-' + tipo + ' py-2';   // al reemplazar las clases se quita d-none
+        }
+
         formulario.addEventListener('submit', async function(event) {
             event.preventDefault();
 
-            const username = document.getElementById('username').value;
+            const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
+
+            if (!username) {
+                // mensaje.textContent = 'Debe ingresar un usuario';
+                mostrarMensaje('Debe ingresar un usuario', 'danger');
+                return;
+            }
 
             const respuesta = await fetch('/api/login/', {
                 method: 'POST',
@@ -50,10 +82,12 @@
 
             if (respuesta.ok) {
                 sessionStorage.setItem('token', datos.token);
-                mensaje.textContent = 'Inicio de sesión correcto';
+                // mensaje.textContent = 'Inicio de sesión correcto';
+                mostrarMensaje('Inicio de sesión correcto', 'success');
                 window.location.href = datos.redirect || '/';
             } else {
-                mensaje.textContent = datos.error || 'Error al iniciar sesión';
+                // mensaje.textContent = datos.error || 'Error al iniciar sesión';
+                mostrarMensaje(datos.error || 'Error al iniciar sesión', 'danger');
             }
         });
     </script>

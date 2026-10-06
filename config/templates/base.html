@@ -39,6 +39,15 @@
                     </li>
                 </ul>
                 {% endwith %}
+
+                <!-- Botón de cerrar sesión -->
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'logout' %}" class="d-flex align-items-center ms-lg-3">
+                    {% csrf_token %}
+                    <span class="navbar-text me-2">👤 {{ user.username }}</span>
+                    <button type="submit" class="btn btn-outline-light btn-sm">Cerrar sesión</button>
+                </form>
+                {% endif %}
             </div>
         </div>
     </nav>

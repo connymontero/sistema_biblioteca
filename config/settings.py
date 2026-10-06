@@ -145,3 +145,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
+
+# Ruta a la que @login_required redirige si no hay sesión
+LOGIN_URL = 'login'

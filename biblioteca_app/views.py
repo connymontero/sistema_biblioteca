@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib import messages
-from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.db.models import ProtectedError, Q
 from .models import Editorial, Genero, Libro
 from .forms import EditorialForm, GeneroForm, LibroForm
@@ -10,12 +10,15 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.authtoken.models import Token
+from django.contrib.auth.decorators import login_required # para proteger vistas con @login_required
+from django.views.decorators.http import require_POST
 
-def login(request):
-    if request.user.is_authenticated:
-        return redirect('inicio')  # Redirige a la página de inicio si el usuario ya está autenticado
-    return render(request, 'login.html')
+# def login(request):
+#     if request.user.is_authenticated:
+#         return redirect('inicio')  # Redirige a la página de inicio si el usuario ya está autenticado
+#     return render(request, 'login.html')
 
+@login_required
 def inicio(request):
     return render(request, 'inicio.html', {
         'total_libros': Libro.objects.count(),            # SELECT COUNT(*) por tabla
@@ -28,6 +31,7 @@ def inicio(request):
 
 # ---------- Editorial ----------
 
+@login_required
 def editorial_panel(request):
     q = request.GET.get('q', '')                 # texto del buscador ('' si no viene)
     orden = request.GET.get('orden', 'asc')      # 'asc' por defecto
@@ -44,6 +48,7 @@ def editorial_panel(request):
     })
 
 
+@login_required
 def editorial_crear(request):
     if request.method == 'POST':
         form = EditorialForm(request.POST)
@@ -59,6 +64,7 @@ def editorial_crear(request):
     })
 
 
+@login_required
 def editorial_editar(request, pk):
     editorial = get_object_or_404(Editorial, pk=pk)
     if request.method == 'POST':
@@ -74,7 +80,7 @@ def editorial_editar(request, pk):
         'accion': request.path,
     })
 
-
+@login_required
 def editorial_eliminar(request):
     if request.method == 'POST':
         ids = request.POST.getlist('seleccionados')             # lista de pks marcados
@@ -88,6 +94,7 @@ def editorial_eliminar(request):
 
 # ---------- Género ----------
 
+@login_required
 def genero_panel(request):
     q = request.GET.get('q', '')
     orden = request.GET.get('orden', 'asc')
@@ -104,6 +111,7 @@ def genero_panel(request):
     })
 
 
+@login_required
 def genero_crear(request):
     if request.method == 'POST':
         form = GeneroForm(request.POST)
@@ -119,6 +127,7 @@ def genero_crear(request):
     })
 
 
+@login_required
 def genero_editar(request, pk):
     genero = get_object_or_404(Genero, pk=pk)
     if request.method == 'POST':
@@ -135,6 +144,7 @@ def genero_editar(request, pk):
     })
 
 
+@login_required
 def genero_eliminar(request):
     if request.method == 'POST':
         ids = request.POST.getlist('seleccionados')
@@ -159,6 +169,7 @@ ORDEN_LIBRO = {
 }
 
 
+@login_required
 def libro_panel(request):
     q = request.GET.get('q', '')                    # texto: busca en título, autor o ISBN
     editorial_id = request.GET.get('editorial', '') # id de editorial ('' = todas)
@@ -189,6 +200,7 @@ def libro_panel(request):
     })
 
 
+@login_required
 def libro_crear(request):
     if request.method == 'POST':
         form = LibroForm(request.POST)
@@ -204,6 +216,7 @@ def libro_crear(request):
     })
 
 
+@login_required
 def libro_editar(request, pk):
     libro = get_object_or_404(Libro, pk=pk)
     if request.method == 'POST':
@@ -220,6 +233,7 @@ def libro_editar(request, pk):
     })
 
 
+@login_required
 def libro_eliminar(request):
     # Sin try/except ProtectedError: ningún modelo apunta a Libro con FK,
     # así que borrar un libro nunca está protegido.
@@ -233,7 +247,14 @@ def libro_eliminar(request):
 #------------ Login -------------
 
 def login_pagina(request):
+    if request.user.is_authenticated:
+        return redirect('inicio')   # ya hay sesión: no tiene sentido mostrar el login
     return render(request, 'login.html')
+
+@require_POST
+def logout_vista(request):
+    auth_logout(request)        # borra la sesión de la BD y limpia request.user
+    return redirect('login')
 
 
 class LoginApiView(APIView):
@@ -243,6 +264,13 @@ class LoginApiView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
+
+        
+        if not isinstance(username, str) or not isinstance(password, str) \
+        or not username.strip() or not password:
+            return Response({
+                'error': 'Debe ingresar usuario y contraseña'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         usuario = authenticate(request, username=username, password=password)
 
